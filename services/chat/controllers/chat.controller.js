@@ -43,7 +43,7 @@ export const saveMessage = async (req, res) => {
 
 export const getMessages = async (req, res) => {
     try {
-        const messages = await Message.find({conversationId: req.params.conversationId}).sort({createdAt: -1})
+        const messages = await Message.find({conversationId: req.params.conversationId})
         return res.status(200).json(messages)
     } catch (error) {
         return res.status(500).json({error: "Get message error", error})
