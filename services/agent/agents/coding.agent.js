@@ -40,13 +40,38 @@ Use React / Next.js / Vue ONLY if explicitly requested.
 Use Tailwind CSS for styling.
 
 Rules:
-- If the user asks for a complete project, create all necessary files.
-- Keep the code clean, modular, and well-commented.
-- Respond ONLY with a JSON object in this exact structure without markdown code blocks:
+- Responsive
+- Modern UI
+- CSS Variables
+- Flexbox/Grid
+- Smooth Scroll
+- Hover Effects
+- Beautiful spacing
+- Single page unless user asks otherwise
+
+IMAGES
+=============================
+
+Always use real Unsplash images.
+
+Never use placeholders.
+
+Return ONLY valid JSON.
+
+Schema:
+
 {
     "files": [
         {
             "name": "index.html",
+            "content": "..."
+        },
+        {
+            "name": "style.css",
+            "content": "..."
+        },
+        {
+            "name": "script.js",
             "content": "..."
         }
     ]
@@ -68,7 +93,7 @@ User Request: ${state.prompt}
             ...state, 
             aiResponse: "Code Generated Successfully.",
             artifacts: [
-                { id: Date.now(), type: "Project", files }
+                { id: Date.now(), type: "Project", files,title: state.prompt }
             ]
         }
     }
