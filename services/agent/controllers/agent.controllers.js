@@ -1,7 +1,6 @@
 import axios from "axios"
 import { graph } from "../graph/graph.js"
 import { addMessage } from "../config/memory.js"
-import redis from "../../../shared/redis/redis.js"
 
 export const agent = async (req, res) => {
     try {
@@ -14,7 +13,7 @@ export const agent = async (req, res) => {
         const result = await graph.invoke({ prompt, conversationId, agent })
         const response = result.aiResponse
         await addMessage(conversationId,"user",prompt)
-        await addMessage(conversationId,"assistant",response)
+        await addMessage(conversationId,"assistant",response, result?.images || [])
         await axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
             conversationId, role:"assistant", content: result?.aiResponse, images: result?.images, artifacts: result?.artifacts
         })
@@ -22,7 +21,7 @@ export const agent = async (req, res) => {
             answer: result?.aiResponse,
             images: result?.images || [],
             search: result?.searchResults || [],
-            artifacts: result.artifacts || []
+            artifacts: result?.artifacts || []
         })
     } catch (error) {
         return res.status(500).json({message: `Agent error ${error}`})

@@ -3,8 +3,9 @@ import { getModel } from "../config/llmModels.js"
 import { getMemory } from "../config/memory.js"
 
 export const chatAgent = async (state) => {
-    
-    const llm = await getModel("chat")
+
+    try {
+        const llm = await getModel("chat")
     
     const history = await getMemory(state.conversationId)
 
@@ -52,4 +53,10 @@ If searchContext exists:
         ...state,
         aiResponse: response.content
     }
+    } catch (error) {
+        console.error("Error in chat agent:", error)
+        return {...state, aiResponse: "Failed to generate response"}
+    }
+    
+    
 }
