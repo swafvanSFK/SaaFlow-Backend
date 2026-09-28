@@ -18,12 +18,19 @@ export const login = async (req, res) => {
         }
 
         const sessionId = crypto.randomUUID()
+        await redis.set(`user-session-${user?._id}`, sessionId, "EX", 7 * 24 * 60 * 60)
         await redis.set(`session-${sessionId}`, JSON.stringify({
             userId: user._id,
             name: user.name,
             email: user.email,
-            avatar: user.avatar
+            avatar: user.avatar,
+            plan: user.plan, 
+            credits: user.credits,
+            totalCredits: user.totalCredits,
+            planExpiresAt: user.planExpiresAt
         }), "EX", 7 * 24 * 60 * 60 )
+
+
         res.cookie("session", sessionId, {
             httpOnly: true,
             secure: false,
@@ -64,9 +71,22 @@ export const updateUserPayment = async (req, res) => {
         user.planExpiresAt= new Date(Date.now() + 30*24*60*60*1000)
         await user.save()
 
-        return res.status(200).json(user)
+        const sessionId = await redis.get(`user-session-${user?._id}`)
+        await redis.set(`session-${sessionId}`, JSON.stringify({
+            userId: user._id,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar,
+            plan: user.plan, 
+            credits: user.credits,
+            totalCredits: user.totalCredits,
+            planExpiresAt: user.planExpiresAt
+        }), "EX", 7 * 24 * 60 * 60 )
+
+        return res.status(200).json({success:true})
         
     } catch (error) {
-        
+        return res.status(500).json({message: `Update user payment error:  ${error}`})
     }
 }
+
