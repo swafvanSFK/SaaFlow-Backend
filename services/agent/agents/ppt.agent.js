@@ -2,6 +2,7 @@ import { getModel } from "../config/llmModels.js"
 import { generatePPT } from "../utils/generatePPT.js"
 import { getFromS3 } from "../utils/getFromS3.js"
 import { uploadToS3 } from "../utils/uploadToS3.js"
+import deductCredits from "../utils/deductCredits.js"
 
 export const pptAgent = async (state) => {
     try {
@@ -39,7 +40,8 @@ ${state.prompt}
         const res = await llm.invoke(prompt)
         const rawContent = (typeof res?.content === "string" ? res.content : "").trim()
         const jsonMatch = rawContent.match(/\{[\s\S]*\}/)
-
+        await deductCredits(state.userId, "ppt")
+        
         if (!jsonMatch) {
             throw new Error(`LLM did not return JSON. Output: ${rawContent.slice(0, 100)}`)
         }

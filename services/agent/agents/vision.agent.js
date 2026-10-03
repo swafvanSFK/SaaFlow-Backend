@@ -2,6 +2,7 @@ import { getModel } from "../config/llmModels.js"
 import axios from 'axios'
 import { uploadToS3 } from "../utils/uploadToS3.js"
 import { getFromS3 } from "../utils/getFromS3.js"
+import deductCredits from "../utils/deductCredits.js"
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -75,6 +76,7 @@ Return ONLY the prompt text.
 User Request: 
 ${state.prompt}
         `)
+        await deductCredits(state.userId, "vision")
 
         const promptText = (typeof res?.content === "string" ? res.content : state.prompt).trim()
         const imageRes = await fetchImageWithRetry(promptText || state.prompt)

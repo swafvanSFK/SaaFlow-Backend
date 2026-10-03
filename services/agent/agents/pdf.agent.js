@@ -2,6 +2,7 @@ import { getModel } from "../config/llmModels.js"
 import { uploadToS3 } from "../utils/uploadToS3.js"
 import { getFromS3 } from "../utils/getFromS3.js"
 import { generatePDF } from "../utils/generatePDF.js"
+import deductCredits from "../utils/deductCredits.js"
 
 export const pdfAgent = async (state) => {
     try {
@@ -44,7 +45,7 @@ ${state.prompt}
         }
 
         const data = JSON.parse(jsonMatch[0])
-        console.log('data -------------- > ', data)
+        await deductCredits(state.userId, "pdf")
         const pdfBuffer = await generatePDF(data)
 
         const fileName = `pdf-${Date.now()}.pdf`

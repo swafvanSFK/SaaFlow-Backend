@@ -1,9 +1,10 @@
 import { getModel } from "../config/llmModels.js"
+import deductCredits from "../utils/deductCredits.js"
 
 export const codingAgent = async (state) => {
 
     try {
-         const intentLLM = await getModel("intent")
+    const intentLLM = await getModel("intent")
     const codingLLM = await getModel("coding")
 
     const intentRes = await intentLLM.invoke(`
@@ -86,6 +87,7 @@ User Request: ${state.prompt}
         let files = []
         try {
             const data = JSON.parse(cleanedContent)
+            await deductCredits(state.userId, "coding")
             files = data.files || []
         } catch (err) {
             console.error("Failed to parse LLM response JSON in codingAgent:", err)
@@ -124,6 +126,7 @@ ${state.prompt}
         `)
 
     const data = res.content
+    await deductCredits(state.userId, "coding")
 
     return {
         ...state,
