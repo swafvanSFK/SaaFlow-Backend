@@ -3,6 +3,8 @@ import axios from 'axios'
 import { uploadToS3 } from "../utils/uploadToS3.js"
 import { getFromS3 } from "../utils/getFromS3.js"
 import deductCredits from "../utils/deductCredits.js"
+import { checkAgentLimit } from "../config/agentLimit.js"
+
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -64,6 +66,7 @@ const fetchImageWithRetry = async (prompt, maxRetries = 2) => {
 
 export const visionAgent = async (state) => {
     try {
+        await checkAgentLimit(state.userId, "image")
         const llm = await getModel("image")
 
         const res = await llm.invoke(`
@@ -97,7 +100,7 @@ ${state.prompt}
         console.error("Error in vision agent:", error?.message || error)
         return {
             ...state,
-            aiResponse: "Failed to generate image due to high demand or rate limits. Please try again in a few moments.",
+            aiResponse: error.data.message || "Failed to Generate Image",
             images: []
         }
     }

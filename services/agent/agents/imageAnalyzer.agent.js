@@ -2,9 +2,11 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { getModel } from "../config/llmModels.js"
 import fs from 'fs/promises'
 import deductCredits from "../utils/deductCredits.js"
+import { checkAgentLimit } from "../config/agentLimit.js"
 
 export const imageAnalyzer = async (state) => {
     try {
+        await checkAgentLimit(state.userId, "vision")
         const llm = await getModel("imageAnalyzer")
 
         const imageBuffer = await fs.readFile(state.file.path)
@@ -52,9 +54,9 @@ Rules:
     } catch (error) {
         console.log("imageAnalyzer error", error)
         return {
-            ...state, 
-            aiResponse: "Image processing failed. Please try again."
-        }
+            ...state,
+            aiResponse: error.data.message || "Failed to Generate Image"
+        } 
     }
     finally {
        await fs.unlink(state.file.path)

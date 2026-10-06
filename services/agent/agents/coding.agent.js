@@ -1,9 +1,11 @@
+import { checkAgentLimit } from "../config/agentLimit.js"
 import { getModel } from "../config/llmModels.js"
 import deductCredits from "../utils/deductCredits.js"
 
 export const codingAgent = async (state) => {
 
     try {
+    await checkAgentLimit(state.userId, "coding")
     const intentLLM = await getModel("intent")
     const codingLLM = await getModel("coding")
 
@@ -135,8 +137,10 @@ ${state.prompt}
     }
     } catch (error) {
         console.error("Error in coding agent:", error)
-        return {...state, aiResponse: "Failed to generate code"}
-    }
+            return {
+                ...state,
+                aiResponse: error.data.message || "Failed to Generate Code",artifacts: []
+            }     }
 
    
 } 

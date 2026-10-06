@@ -3,9 +3,12 @@ import { uploadToS3 } from "../utils/uploadToS3.js"
 import { getFromS3 } from "../utils/getFromS3.js"
 import { generatePDF } from "../utils/generatePDF.js"
 import deductCredits from "../utils/deductCredits.js"
+import { checkAgentLimit } from "../config/agentLimit.js"
+
 
 export const pdfAgent = async (state) => {
     try {
+        await checkAgentLimit(state.userId, "chat")
         const llm = await getModel("pdf")
         const prompt = `
 You are an expert document writer and researcher.
@@ -62,7 +65,10 @@ ${state.prompt}
 _Link is active for 24 hours._`,
         }
     } catch (error) {
-        console.error("Error in pdf agent:", error)
-        return {...state, aiResponse: "Failed to process PDF"}
+                console.error("Error in PDF agent:", error)
+            return {
+                ...state,
+                aiResponse: error.data.message || "Failed to Generate PDF"
+            } 
     }
 }
